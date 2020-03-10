@@ -7,5 +7,7 @@ defmodule AutoFinderWeb.Router do
 
   scope "/api", AutoFinderWeb do
     pipe_through :api
+
+    get "/used_cars", UsedCarController, :index
   end
 end
