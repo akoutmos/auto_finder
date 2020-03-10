@@ -5,7 +5,7 @@ config :auto_finder, AutoFinder.Repo,
   username: "postgres",
   password: "postgres",
   database: "auto_finder_dev",
-  hostname: "localhost",
+  hostname: "postgres",
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 

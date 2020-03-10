@@ -19,12 +19,16 @@ config :auto_finder, AutoFinderWeb.Endpoint,
   live_view: [signing_salt: "60QXfDxg"]
 
 # Configures Elixir's Logger
-config :logger, :console,
-  format: "$time $metadata[$level] $message\n",
-  metadata: [:request_id]
+config :logger, backends: [LoggerJSON]
+config :auto_finder, AutoFinder.Repo, loggers: [{LoggerJSON.Ecto, :log, [:info]}]
+
+config :logger_json, :backend,
+  metadata: [:file, :line, :function, :module, :application, :httpRequest, :query],
+  formatter: AutoFinder.LoggerFormatter
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
+config :phoenix, :logger, false
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

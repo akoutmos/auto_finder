@@ -16,6 +16,15 @@ defmodule AutoFinder.Application do
       # {AutoFinder.Worker, arg},
     ]
 
+    # Attach Telemetry handler for Ecto events
+    :ok =
+      :telemetry.attach(
+        "logger-json-ecto",
+        [:auto_finder, :repo, :query],
+        &LoggerJSON.Ecto.telemetry_logging_handler/4,
+        :info
+      )
+
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: AutoFinder.Supervisor]
