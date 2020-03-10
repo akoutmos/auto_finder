@@ -1,0 +1,68 @@
+version: '3.7'
+
+services:
+  auto_finder_app:
+    image: elixir:1.10.2
+    command: >
+      /bin/sh -c 'apt-get update && apt-get install -y inotify-tools &&
+      mix local.hex --force &&
+      mix local.rebar --force &&
+      mix deps.get &&
+      mix ecto.setup &&
+      mix phx.server'
+    ports:
+      - '4000:4000'
+    depends_on:
+      - loki
+      - postgres
+    working_dir: /app
+    logging:
+      driver: loki
+      options:
+        loki-url: 'http://loki:loki@localhost:3100/loki/api/v1/push'
+    volumes:
+      - ./config:/app/config:ro
+      - ./lib:/app/lib:ro
+      - ./priv:/app/priv:ro
+      - ./mix.exs:/app/mix.exs:ro
+      - ./mix.lock:/app/mix.lock:rw
+      - elixir-deps:/app/deps/
+      - elixir-build:/app/_build/
+
+  postgres:
+    image: postgres:12.2
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+
+  loki:
+    image: grafana/loki:master-f106c09
+    volumes:
+      - ./docker/loki/loki-config.yml:/etc/loki/loki-config.yml
+      - loki-data-index:/loki-index
+      - loki-data-chunks:/loki-chunks
+    expose:
+      - 3100
+    ports:
+      - '3100:3100'
+    command: '-config.file=/etc/loki/loki-config.yml'
+
+  grafana:
+    image: grafana/grafana:6.6.2
+    ports:
+      - '3000:3000'
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./docker/grafana/:/etc/grafana/provisioning/
+
+volumes:
+  elixir-deps: {}
+  elixir-build: {}
+  postgres-data: {}
+  loki-data-index: {}
+  loki-data-chunks: {}
+  grafana-data: {}
